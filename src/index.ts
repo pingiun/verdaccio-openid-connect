@@ -11,7 +11,7 @@ import {
 import {Issuer, Client, TokenSet} from 'openid-client';
 import asyncRetry = require('async-retry');
 import * as express from 'express';
-import {Express, Response} from 'express';
+import {Express} from 'express';
 import {nanoid} from 'nanoid/async';
 import ms = require('ms');
 import * as jwt from 'jsonwebtoken';
