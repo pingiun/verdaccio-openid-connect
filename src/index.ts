@@ -470,13 +470,6 @@ export default class OidcPlugin
     });
   }
 
-  private unauthorized(res: Response, msg: string): void {
-    let plugin = this.getInstance();
-    plugin.logger.trace({msg}, 'Unauthorized access: @{msg}');
-    res.status(401);
-    res.set('Content-Type', 'text/plain').end(msg);
-  }
-
   private async saveSessionAndCreateTokens(
     sessionId: string,
     tokenSet: TokenSet,
