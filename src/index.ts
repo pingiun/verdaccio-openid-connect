@@ -377,58 +377,6 @@ export default class OidcPlugin
     auth: IBasicAuth<OidcPluginConfig>,
   ): void {
     let plugin = this.getInstance();
-    app.put(
-      '/-/user/org.couchdb.user::userId',
-      express.json(),
-      (req, res, next) => {
-        Promise.resolve()
-          .then(async () => {
-            const subjectToken = req.body.password;
-            if (!subjectToken) {
-              this.unauthorized(res, 'Password attribute is missing.');
-              return;
-            }
-            const userName = req.body.name;
-            if (userName !== req.params[':userId']) {
-              this.unauthorized(res, 'User ID in URL and body do not match.');
-              return;
-            }
-            const client = await plugin.clientPromise;
-            let tokenSet = await client.grant({
-              grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
-              'requested_token_type ':
-                'urn:ietf:params:oauth:token-type:refresh_token',
-              client_id: process.env.OIDC_CLIENT_ID || plugin.config.clientId,
-              client_secret: process.env.OIDC_CLIENT_SECRET || plugin.config.clientSecret,
-              subject_token: subjectToken,
-              subject_token_type:
-                'urn:ietf:params:oauth:token-type:access_token',
-              scope: plugin.config.scope,
-            });
-
-            const tokenUsername = this.getUsername(tokenSet);
-            if (userName !== tokenUsername) {
-              this.unauthorized(
-                res,
-                'Access token is not issued for the user trying to log in.',
-              );
-              return;
-            }
-
-            const sessionId = await nanoid();
-            const {npmToken} = await this.saveSessionAndCreateTokens(
-              sessionId,
-              tokenSet,
-              auth,
-            );
-            const responseBody = JSON.stringify({token: npmToken});
-            res.status(201);
-            res.set('Content-Type', 'application/json').end(responseBody);
-          })
-          .catch(next);
-      },
-    );
-
     if (plugin.config.accessTokenAuth !== true) {
       app.post('/-/v1/login', express.json(), (req, res, next) => {
         Promise.resolve()
